@@ -58,12 +58,12 @@ References
 Precomputed Radiance Transfer for Real-Time Rendering in Dynamic, Low-Frequency Lighting Environments
 Peter-Pike Sloan, Jan Kautz, and John Snyder
 SIGGRAPH 2002, July 2002
-http://research.microsoft.com/~ppsloan/
+http://www.ppsloan.org/publications/
 
 Spherical Harmonic Lighting: The Gritty Details
 Robin Green
 GDC 2003, Presentation
-http://www.research.scea.com/gdc2003/spherical-harmonic-lighting.html
+https://basesandframes.wordpress.com/2016/05/11/spherical-harmonic-lighting-the-gritty-details/
 
 Rotation Matrices for Real Spherical Harmonics. Direct Determination by Recursion
 Joseph Ivanic and Klaus Ruedenberg
