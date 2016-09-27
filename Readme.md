@@ -1,8 +1,6 @@
 
-Spherical Harmonic Lighting
-Don Williamson, June 2003
-don@donw.co.uk
----------------------------
+# Spherical Harmonic Lighting
+### Don Williamson, June 2003
 
 This is an implementation of Spherical Harmonic Lighting to partially simulate Global Illumination
 on a per-vertex level in real-time. The structure of the program follows directly from the material
@@ -11,14 +9,14 @@ viewer with many modes. You can rotate all objects you can see by clicking the l
 the window and dragging in any direction. You can change modes by pressing the space bar. The modes
 are:
 
-	1. Monte-carlo estimator samples on the sphere.
-	2. Associated Legendre plot.
-	3. 3D representation of spherical harmonic bases.
-	4. Comparison of an original spherical lighting function (left) and it's SH projected equivalent (right, 4 bands).
-	5. Simple OpenGL-lit beethoven bust.
-	6. Same model diffusely lit by HDR lightsource (rnl_probe.hdr).
-	7. Diffusely lit with self-shadowing.
-	8. Diffusely lit with self-shadowing and inter-reflectance.
+1. Monte-carlo estimator samples on the sphere.
+2. Associated Legendre plot.
+3. 3D representation of spherical harmonic bases.
+4. Comparison of an original spherical lighting function (left) and it's SH projected equivalent (right, 4 bands).
+5. Simple OpenGL-lit beethoven bust.
+6. Same model diffusely lit by HDR lightsource (rnl_probe.hdr).
+7. Diffusely lit with self-shadowing.
+8. Diffusely lit with self-shadowing and inter-reflectance.
 
 This is a Win32 OpenGL program that any recent (last 3 years) video card should be able to run.
 
