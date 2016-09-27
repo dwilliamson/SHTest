@@ -1,0 +1,1 @@
+copy ..\..\SDLApp\Runtime\*.dll .

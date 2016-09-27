@@ -1,0 +1,10 @@
+{ RCSid: $Id: tilt.cal,v 2.3 2003/02/22 02:07:23 greg Exp $ }
+{
+	tilt.cal - tilt data for IES luminaires
+}
+
+tilt_ang = Acos(Kz) / DEGREE;
+tilt_xang = if(Jy*Jy-FTINY, Asin(Jy/sqrt(Jy*Jy+Jz*Jz))/DEGREE, 0);
+
+tilt_ang2 = tri(tilt_ang, 90);
+tilt_xang2 = tri(tilt_xang, 90);

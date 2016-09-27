@@ -1,0 +1,248 @@
+# RCSid: $Id: Rmakefile,v 2.35 2003/03/11 19:29:05 greg Exp $
+#
+# Compiles for ray tracing programs.
+#
+
+OPT = -O
+MACH = -DBSD
+CFLAGS = -I../common -L../lib $(OPT) $(MACH)
+SPECIAL = aed
+CC = cc
+MLIB = -lm
+LINT = lint
+LINTFLAGS = -DBSD
+
+#
+# The following are user-definable:
+#
+DESTDIR = .
+INSTDIR = /usr/local/bin
+INSTALL = cp
+
+#
+# The following paths must exist and be relative to root:
+#
+DEVDIR = $(INSTDIR)/dev
+LIBDIR = /usr/local/lib/ray
+
+#
+# Library routines:
+#
+RLIB = ../lib/libradiance.a
+LIBS = -lrt $(MLIB)
+
+#
+# Device drivers for rview (see also devtable.c):
+#
+DOBJS = devtable.o devcomm.o editline.o x11.o x11twind.o \
+	colortab.o
+DSRC = devtable.c devcomm.c editline.c x11.c x11twind.c \
+	colortab.c
+DLIBS = -lX11
+
+#
+# Standard object files:
+#
+
+RTOBJS = rtmain.o rtrace.o duphead.o persist.o
+RTSRC = rtmain.c rtrace.c duphead.c persist.c
+
+RPOBJS = rpmain.o rpict.o srcdraw.o duphead.o persist.o
+RPSRC = rpmain.c rpict.c srcdraw.c duphead.c persist.c
+
+RVOBJS = rvmain.o rview.o rv2.o rv3.o $(DOBJS)
+RVSRC = rvmain.c rview.c rv2.c rv3.c $(DSRC)
+
+RLOBJS = raycalls.o raypcalls.o
+RLSRC = raycalls.c raypcalls.c
+
+ROBJS = $(RAYOBJS) $(SURFOBJS) $(MATOBJS) \
+	$(MODOBJS) $(SUPPOBJS)
+RSRC = $(RAYSRC) $(SURFSRC) $(MATSRC) \
+	$(MODSRC) $(SUPPSRC)
+
+RAYOBJS = ambcomp.o ambient.o ambio.o freeobjmem.o initotypes.o \
+	preload.o raytrace.o renderopts.o
+RAYSRC = ambcomp.c ambient.c ambio.c freeobjmem.c initotypes.c \
+	preload.c raytrace.c renderopts.c
+
+SURFOBJS = source.o sphere.o srcsupp.o srcsamp.o virtuals.o o_face.o \
+	o_cone.o o_instance.o o_mesh.o
+SURFSRC = sphere.c source.c srcsupp.c virtuals.c o_face.c \
+	srcsamp.c o_cone.c o_instance.c o_mesh.c
+
+MATOBJS = aniso.o normal.o dielectric.o m_clip.o glass.o m_brdf.o \
+	m_mirror.o m_direct.o m_mist.o fprism.o m_alias.o
+MATSRC = aniso.c normal.c dielectric.c m_clip.c glass.c m_brdf.c \
+	m_mirror.c m_direct.c m_mist.c fprism.c m_alias.c
+
+MODOBJS = p_func.o t_func.o p_data.o t_data.o text.o mx_func.o mx_data.o
+MODSRC = p_func.c t_func.c p_data.c t_data.c text.c mx_func.c mx_data.c
+
+SUPPOBJS = func.o noise3.o data.o
+SUPPSRC = func.c noise3.c data.c
+
+HEADERS = ambient.h ray.h data.h otspecial.h source.h
+
+#
+# What this makefile produces:
+#
+
+PROGS = $(DESTDIR)/rtrace $(DESTDIR)/rpict $(DESTDIR)/rview $(DESTDIR)/lookamb
+
+all:	$(PROGS) $(SPECIAL) $(RLOBJS)
+
+install:	all rayinit.cal
+	$(INSTALL) $(PROGS) $(INSTDIR)
+	cp $(RLOBJS) ../lib
+	rm -f $(LIBDIR)/rayinit.cal
+	cp rayinit.cal $(LIBDIR)
+
+aed:	$(DEVDIR)/aed
+
+ogl:	
+
+clean:
+	set nonomatch; rm -f $(PROGS) *.o core
+
+lint:	$(RVSRC)
+	$(LINT) $(LINTFLAGS) -DRVIEW $(RVSRC) $(LIBS)
+
+#
+# Links:
+#
+
+$(DESTDIR)/rtrace:	$(RTOBJS) $(RLIB)
+	$(CC) $(CFLAGS) -o $(DESTDIR)/rtrace $(RTOBJS) $(RLIB) $(LIBS)
+
+$(DESTDIR)/rpict:	$(RPOBJS) $(RLIB)
+	$(CC) $(CFLAGS) -o $(DESTDIR)/rpict $(RPOBJS) $(RLIB) $(LIBS)
+
+$(DESTDIR)/rview:	$(RVOBJS) $(RLIB)
+	$(CC) $(CFLAGS) -o $(DESTDIR)/rview $(RVOBJS) $(RLIB) $(LIBS) $(DLIBS)
+
+$(DESTDIR)/lookamb:	lookamb.o ambio.o
+	$(CC) $(CFLAGS) -o $(DESTDIR)/lookamb lookamb.o ambio.o $(LIBS)
+
+$(DEVDIR)/aed:	aed.o colortab.o tty.o devmain.o editline.o
+	$(CC) $(CFLAGS) -s -o $(DEVDIR)/aed aed.o colortab.o \
+devmain.o tty.o editline.o $(LIBS)
+
+$(RLIB):	$(ROBJS) Version.o
+	ar rc $(RLIB) $(ROBJS) Version.o
+	-ranlib $(RLIB)
+
+#
+# Special compiles:
+#
+
+rtmain.o:	rtmain.c
+	$(CC) $(CFLAGS) -DNICE=4 -c rtmain.c
+
+rpmain.o:	rpmain.c
+	$(CC) $(CFLAGS) -DNICE=6 -c rpmain.c
+
+rvmain.o:	rvmain.c
+	$(CC) $(CFLAGS) -c rvmain.c
+
+#
+# Uncomment the following to model dispersion:
+#
+dielectric.o:	dielectric.c source.h
+	$(CC) $(CFLAGS) -DDISPERSE -c dielectric.c
+
+# end of dispersion compiles.
+
+devcomm.o:	devcomm.c
+	$(CC) $(CFLAGS) -DDEVPATH=\"$(DEVDIR)\" -c devcomm.c
+
+aed.o:	aed.c
+	$(CC) $(CFLAGS) -Daed_init=dinit -c aed.c
+
+#
+# Version module:
+#
+
+Version.c:	VERSION $(RSRC) $(HEADERS)
+	( cat VERSION ; date ; whoami ; hostname ) > Version.c
+	ed - Version.c < verscript.ed
+
+#
+# Include dependencies:
+#
+
+aed.o ambio.o colortab.o data.o devcomm.o \
+devmain.o lookamb.o rview.o x11.o:	../common/color.h
+
+freeobjmem.o o_cone.o srcsupp.o:	../common/cone.h
+
+data.o freeobjmem.o m_brdf.o mx_data.o \
+p_data.o raycalls.o t_data.o:	data.h
+
+aed.o devcomm.o devmain.o devtable.o \
+editline.o tty.o x11.o:	driver.h
+
+freeobjmem.o o_face.o srcsupp.o:	../common/face.h
+
+ambient.o raytrace.o rpmain.o rtmain.o \
+rtrace.o rvmain.o rv2.o rv3.o source.o:	../common/octree.h
+
+o_instance.o:	../common/instance.h
+
+ambient.o aniso.o dielectric.o freeobjmem.o func.o glass.o initotypes.o \
+m_brdf.o m_direct.o m_mirror.o normal.o o_cone.o preload.o \
+raycalls.o raytrace.o rtrace.o rv2.o source.o sphere.o srcsupp.o text.o \
+virtuals.o:	../common/otypes.h
+
+ambient.o ambcomp.o aniso.o normal.o raycalls.o rpict.o rvmain.o \
+rtmain.o rpmain.o persist.o source.o rv3.o \
+srcsamp.o virtuals.o:	../common/random.h
+
+ambcomp.o ambient.o aniso.o dielectric.o freeobjmem.o func.o glass.o \
+m_brdf.o m_clip.o m_direct.o m_mirror.o m_mist.o mx_data.o o_mesh.o \
+mx_func.o normal.o o_cone.o o_face.o o_instance.o p_data.o p_func.o \
+raycalls.o raypcalls.o raytrace.o rpict.o rtrace.o rv2.o rv3.o rview.o \
+source.o sphere.o srcdraw.o srcsamp.o srcsupp.o t_data.o t_func.o text.o \
+rpmain.o rtmain.o rvmain.o virtuals.o m_alias.o:	ray.h \
+../common/standard.h ../common/octree.h \
+../common/mat4.h ../common/fvect.h ../common/object.h ../common/color.h
+
+rv2.o rv3.o rview.o:	rpaint.h driver.h ../common/view.h ../common/resolu.h
+
+m_direct.o m_mirror.o m_mist.o dielectric.o raycalls.o \
+source.o srcdraw.o srcsamp.o srcsupp.o virtuals.o:	source.h
+
+cone.o data.o devcomm.o initotypes.o fprism.o preload.o \
+duphead.o octree.o:	../common/standard.h ../common/mat4.h ../common/fvect.h
+
+ambio.o:	../common/fvect.h
+
+initotypes.o raytrace.o:	otspecial.h
+
+rpmain.o rtmain.o rvmain.o rpict.o \
+srcdraw.o:	../common/view.h ../common/resolu.h
+
+x11.o x11twind.o: x11twind.h
+
+x11.o:	x11icon.h
+
+ambient.o ambcomp.o ambio.o lookamb.o raycalls.o:	ambient.h
+
+data.o rpmain.o rtmain.o rvmain.o rpict.o rtrace.o \
+rv2.o:	../common/resolu.h
+
+aniso.o func.o m_brdf.o m_direct.o mx_data.o mx_func.o p_data.o \
+p_func.o t_data.o t_func.o:	func.h
+
+preload.o:	../common/object.h ../common/face.h ../common/cone.h \
+../common/instance.h ../common/mesh.h ../common/color.h data.h
+
+devcomm.o:	../common/vfork.h
+
+rtmain.o rpmain.o rvmain.o persist.o duphead.o rpict.o:	../common/paths.h
+
+freeobjmem.o raycalls.o text.o:	../common/font.h
+
+raypcalls.o:	../common/selcall.h
+
+o_mesh.o:	../common/mesh.h

@@ -1,0 +1,165 @@
+# RCSid: $Id: Rmakefile,v 2.31 2003/02/22 02:07:30 greg Exp $
+#
+# Radiance makefile for utility programs
+#
+
+MACH = -DBSD
+
+OPT = -O
+
+CFLAGS = -I../common -I../rt -L../lib $(OPT) $(MACH)
+
+CC = cc
+
+SPECIAL =
+
+INSTDIR = /usr/local/bin
+
+LIBDIR = /usr/local/lib/ray
+
+PROGS = findglare glarendx rpiece rad ranimate ranimove vwright getinfo \
+		vwrays xglaresrc
+
+all:	$(PROGS)
+
+install:	all $(SPECIAL) objview.csh objpict.csh glare.csh dayfact.csh \
+rlux.csh raddepend.csh trad.wsh objline.csh compamb.csh
+	cp $(PROGS) $(INSTDIR)
+	cp objview.csh $(INSTDIR)/objview
+	cp objline.csh $(INSTDIR)/objline
+	cp objpict.csh $(INSTDIR)/objpict
+	cp glare.csh $(INSTDIR)/glare
+	cp dayfact.csh $(INSTDIR)/dayfact
+	cp debugcal.csh $(INSTDIR)/debugcal
+	cp rlux.csh $(INSTDIR)/rlux
+	cp raddepend.csh $(INSTDIR)/raddepend
+	cp compamb.csh $(INSTDIR)/compamb
+	cp vinfo.csh $(INSTDIR)/vinfo
+	chmod 755 $(INSTDIR)/objview $(INSTDIR)/objpict \
+		$(INSTDIR)/glare $(INSTDIR)/dayfact $(INSTDIR)/debugcal \
+		$(INSTDIR)/rlux $(INSTDIR)/raddepend $(INSTDIR)/objline \
+		$(INSTDIR)/compamb $(INSTDIR)/vinfo
+	csh -f tradinstall.csh $(INSTDIR) $(LIBDIR)/tcl
+
+clean:
+	set nonomatch; rm -f *.o $(PROGS) glrad core
+
+ogl:	glrad
+	cp glrad $(INSTDIR)
+
+x10:
+
+aed:
+
+sgi:
+
+sun:
+
+scanner:	scanner.o
+	$(CC) $(CFLAGS) -o scanner scanner.o -lm
+
+makedist:	makedist.o setscan.o
+	$(CC) $(CFLAGS) -o makedist makedist.o setscan.o -lrt -lm
+
+findglare:	findglare.o glareval.o glaresrc.o setscan.o
+	$(CC) $(CFLAGS) -o findglare findglare.o glareval.o glaresrc.o \
+setscan.o -lrt -lm
+
+glarendx:	glarendx.o
+	$(CC) $(CFLAGS) -o glarendx glarendx.o -lrt -lm
+
+xglaresrc:	xglaresrc.o x11findwind.o
+	$(CC) $(CFLAGS) -o xglaresrc xglaresrc.o \
+x11findwind.o -lrt -lX11 -lm
+
+rad:	rad.o
+	$(CC) $(CFLAGS) -o rad rad.o -lrt -lm
+
+ranimate:	ranimate.o netproc.o
+	$(CC) $(CFLAGS) -o ranimate ranimate.o netproc.o -lrt -lm
+
+ranimove:	ranimove.o ranimove1.o ranimove2.o \
+../lib/raypcalls.o ../lib/raycalls.o
+	$(CC) $(CFLAGS) -o ranimove ranimove.o ranimove1.o ranimove2.o \
+../lib/raypcalls.o ../lib/raycalls.o -lradiance -lrt -lm
+
+rpiece:	rpiece.o Version.o
+	$(CC) $(CFLAGS) -o rpiece rpiece.o Version.o -lrt -lm
+
+vwright:	vwright.o
+	$(CC) $(CFLAGS) -o vwright vwright.o -lrt -lm
+
+vwrays:		vwrays.o
+	$(CC) $(CFLAGS) -o vwrays vwrays.o -lrt -lm
+
+getinfo:	getinfo.o
+	$(CC) $(CFLAGS) -o getinfo getinfo.o -lrt
+
+glrad:	glrad.o
+	$(CC) $(CFLAGS) -o glrad glrad.o -lrgl -lrt -lGLU -lGL \
+-lX11 -lXext -lm
+
+contour:	contour.o
+	$(CC) $(CFLAGS) -o contour contour.o -lm
+
+pranim:	pranim.o client/libclient.a
+	$(CC) $(CFLAGS) -o pranim pranim.o \
+client/libclient.a -lrpcsvc
+
+t16anim:	t16anim.o client/libclient.a
+	$(CC) $(CFLAGS) -o t16anim t16anim.o \
+client/libclient.a -lrpcsvc
+
+t16anim.o pranim.o:	client/clnt.h
+
+setscan.o makedist.o:	setscan.h
+
+findglare.o glareval.o \
+glaresrc.o:	glare.h ../common/standard.h ../common/mat4.h \
+../common/fvect.h ../common/view.h ../common/color.h setscan.h
+
+glaresrc.o:	../common/linregr.h
+
+rpiece.o:	../common/color.h ../common/view.h ../common/resolu.h
+
+rad.o ranimate.o rpiece.o xglaresrc.o:	../common/standard.h \
+../common/mat4.h ../common/fvect.h
+
+xglaresrc.o:	../common/view.h
+
+swaprasheader.o:	../common/rasterfile.h
+
+glareval.o xglaresrc.o:	../common/resolu.h
+
+xglaresrc.o:	../common/vfork.h
+
+rad.o ranimate.o:	../common/vars.h
+
+ranimove1.o ranimove2.o:	../common/random.h
+
+rad.o:	../common/paths.h
+
+ranimate.o netproc.o:	netproc.h
+
+ranimove1.o:	../common/otypes.h
+
+netproc.o:	../common/paths.h
+
+rad.o ranimate.o ranimove.o:	../common/view.h ../common/resolu.h
+
+glrad.o:	../common/radogl.h \
+../common/standard.h ../common/mat4.h ../common/fvect.h \
+../common/color.h ../common/object.h ../common/otypes.h ../common/lookup.h
+
+glrad.o:	glradicon.h ../common/view.h ../common/paths.h
+
+ranimove.o ranimove1.o ranimove2.o:	ranimove.h \
+../common/vars.h ../common/view.h \
+../rt/ray.h ../common/standard.h ../common/octree.h \
+../common/mat4.h ../common/fvect.h ../common/object.h ../common/color.h
+
+Version.c:	../rt/Version.c
+	cp ../rt/Version.c .
+
+x11findwind.c:	../common/x11findwind.c
+	cp ../common/x11findwind.c .

@@ -1,0 +1,24 @@
+{ RCSid: $Id: tmesh.cal,v 2.1 2003/03/10 19:38:19 greg Exp $ }
+{
+	Interpolate triangle-mesh values using barycentric coordinates.
+
+	A1		= Major axis (0==X, 1==Y, 2==Z)
+	A2 through A10	= Surface normal perturbation matrix
+or:
+	A2 through A7	= Lookup in 2-dimensional pattern or texture
+}
+					{ Get dominant coordinates }
+bu = select(arg(1)+1, Py, Pz, Px);
+bv = select(arg(1)+1, Pz, Px, Py);
+					{ Compute variables }
+v1 = bu*arg( 2) + bv*arg( 3) + arg( 4);
+v2 = bu*arg( 5) + bv*arg( 6) + arg( 7);
+v3 = bu*arg( 8) + bv*arg( 9) + arg(10);
+					{ Surface normal perturbation }
+nf = 1/sqrt(v1*v1 + v2*v2 + v3*v3);
+dx = v1*nf - Nx;
+dy = v2*nf - Ny;
+dz = v3*nf - Nz;
+					{ Lookup table index }
+u = v1;
+v = v2;

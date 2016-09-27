@@ -1,0 +1,102 @@
+# RCSid $Id: Rmakefile,v 2.19 2003/03/10 19:38:19 greg Exp $
+#
+# Makefile for conversion programs
+#
+
+OPT = -O
+
+MACH = -DBSD
+
+CFLAGS = -I../common -L../lib $(OPT) $(MACH)
+
+CC = cc
+
+MLIB = -lm
+
+INSTDIR = /usr/local/bin
+
+LIBDIR = /usr/local/lib/ray
+
+PROGS = thf2rad ies2rad arch2rad nff2rad lampcolor tmesh2rad obj2rad \
+mgf2rad rad2mgf mgf2meta mgfilt mgf2inv
+
+LIBFILES = source.cal tilt.cal lamp.tab
+
+all:	$(PROGS)
+
+install:	$(PROGS) $(LIBFILES)
+	cp $(PROGS) $(INSTDIR)
+	cd $(LIBDIR) ; rm -f $(LIBFILES)
+	cp $(LIBFILES) $(LIBDIR)
+
+clean:
+	set nonomatch; rm -f $(PROGS) *.o core
+	cd mgflib ; make clean
+
+thf2rad:	thf2rad.o
+	$(CC) $(CFLAGS) -o thf2rad thf2rad.o
+
+ies2rad:	ies2rad.o
+	$(CC) $(CFLAGS) -o ies2rad ies2rad.o -lrt -lm
+
+arch2rad:	arch2rad.o trans.o
+	$(CC) $(CFLAGS) -o arch2rad arch2rad.o trans.o -lrt
+
+nff2rad:	nff2rad.o
+	$(CC) $(CFLAGS) -o nff2rad nff2rad.o
+
+lampcolor:	lampcolor.o
+	$(CC) $(CFLAGS) -o lampcolor lampcolor.o -lrt
+
+tmesh2rad:	tmesh2rad.o
+	$(CC) $(CFLAGS) -o tmesh2rad tmesh2rad.o -lrt $(MLIB)
+
+obj2rad:	obj2rad.o trans.o
+	$(CC) $(CFLAGS) -o obj2rad obj2rad.o trans.o -lrt $(MLIB)
+
+mgf2rad:	MGF_LIB mgf2rad.o
+	$(CC) $(CFLAGS) -o mgf2rad mgf2rad.o -lmgf -lrt $(MLIB)
+
+rad2mgf:	rad2mgf.o
+	$(CC) $(CFLAGS) -o rad2mgf rad2mgf.o -lrt $(MLIB)
+
+mgf2meta:	MGF_LIB mgf2meta.o
+	$(CC) $(CFLAGS) -o mgf2meta mgf2meta.o -lmgf -lmeta -lrt $(MLIB)
+
+mgfilt:
+	cd mgflib ; rm -f mgfilt ; \
+	make mgfilt CC=$(CC) \
+		CFLAGS="$(OPT) $(MACH) -DNOPROTO" ; \
+	mv mgfilt ..
+
+mgf2inv:
+	cd mgflib ; rm -f mgf2inv ; \
+	make mgf2inv CC=$(CC) \
+		CFLAGS="$(OPT) $(MACH) -DNOPROTO" ; \
+	mv mgf2inv ..
+
+MGF_LIB:
+	cd mgflib ; rm -f libmgf.a ; \
+	make libmgf.a CC=$(CC) \
+		CFLAGS="$(OPT) $(MACH) -DNOPROTO" ; \
+	cp libmgf.a ../../lib
+
+mgf2rad.o:	mgf2rad.c mgflib/parser.h ../common/tmesh.h ../common/color.h
+	$(CC) $(CFLAGS) -DNOPROTO -c mgf2rad.c
+
+mgf2meta.o:	mgf2meta.c mgflib/parser.h
+	$(CC) $(CFLAGS) -DNOPROTO -c mgf2meta.c
+
+arch2rad.o trans.o:	trans.h
+
+ies2rad.o lampcolor.o:	../common/color.h
+
+ies2rad.o:	../common/paths.h
+
+obj2rad.o tmesh2rad.o:	../common/tmesh.h \
+../common/standard.h ../common/mat4.h ../common/fvect.h
+
+obj2rad.o:	trans.h
+
+rad2mgf.o:	../common/standard.h ../common/mat4.h ../common/fvect.h \
+../common/object.h ../common/color.h ../common/lookup.h

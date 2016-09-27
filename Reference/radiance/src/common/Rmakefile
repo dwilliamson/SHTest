@@ -1,0 +1,129 @@
+# RCSid: $Id: Rmakefile,v 2.38 2003/03/14 21:27:45 greg Exp $
+#
+# Makefile for ray tracing library routines
+#
+
+OPT = -O
+MACH = -DBSD
+CFLAGS = $(MACH) $(OPT)
+CC = cc
+SPECIAL =
+
+COMPAT = bmalloc.o erf.o strcmp.o # frexp.o fwrite.o random.o
+
+LIBDIR = /usr/local/lib/ray
+
+RTOBJ = cone.o face.o free_os.o instance.o readobj.o readoct.o otypes.o \
+	objset.o octree.o readfargs.o modobject.o getlibpath.o \
+	addobjnotify.o zeroes.o mesh.o readmesh.o tmesh.o sceneio.o
+
+PICOBJ = color.o header.o image.o lamps.o resolu.o rexpr.o spec_rgb.o \
+	colrops.o font.o tonemap.o tmapcolrs.o tmapluv.o tmaptiff.o
+
+STDOBJ = fgetline.o fropen.o linregr.o xf.o mat4.o invmat4.o fvect.o urand.o \
+	urind.o calexpr.o caldefn.o calfunc.o calprnt.o biggerlib.o \
+	multisamp.o process.o getpath.o error.o savestr.o savqstr.o \
+	badarg.o fgetword.o words.o expandarg.o wordfile.o fgetval.o \
+	clip.o plocate.o eputs.o wputs.o quit.o lookup.o \
+	loadvars.o tcos.o fputword.o chanvalue.o dircode.o
+
+SYSOBJ = ealloc.o fdate.o portio.o myhostname.o $(COMPAT)
+
+OGLOBJ = rglfile.o rglmat.o rgldomat.o rglsurf.o rglinst.o rglsrc.o
+
+LIBFILES = tmesh.cal
+
+all:	librt.a $(SPECIAL)
+
+librt.a:	$(RTOBJ) $(PICOBJ) $(STDOBJ) $(SYSOBJ)
+	ar rc librt.a $(RTOBJ) $(PICOBJ) $(STDOBJ) $(SYSOBJ)
+	-ranlib librt.a
+
+install:	all
+	mv librt.a ../lib/librt.a
+	cd $(LIBDIR) ; rm -f $(LIBFILES)
+	cp $(LIBFILES) $(LIBDIR)
+
+clean:
+	rm -f *.o librt.a
+
+ogl:	$(OGLOBJ)
+	ar rc librgl.a $(OGLOBJ)
+	-ranlib librgl.a
+	mv librgl.a ../lib/librgl.a
+
+x10:
+
+aed:
+
+sgi:
+
+sun:
+
+getlibpath.o:	getlibpath.c
+	$(CC) $(CFLAGS) -DDEFPATH=\":$(LIBDIR)\" -c getlibpath.c
+
+tmapcolrs.o:	tmapcolrs.c
+	$(CC) $(CFLAGS) -DPCOND=\"pcond\" -c tmapcolrs.c
+
+color.o colrops.o lamps.o spec_rgb.o:	color.h
+
+cone.o:		cone.h
+
+face.o:		face.h
+
+fvect.o:	fvect.h
+
+instance.o:	instance.h
+
+linregr.o:	linregr.h
+
+mat4.o invmat4.o:		mat4.h fvect.h
+
+cone.o face.o instance.o objset.o otypes.o \
+mesh.o modobject.o readfargs.o readmesh.o \
+readobj.o readoct.o sceneio.o:	object.h
+
+mesh.o objset.o octree.o readmesh.o readoct.o sceneio.o:	octree.h
+
+cone.o mesh.o modobject.o otypes.o \
+readobj.o readoct.o sceneio.o:	otypes.h
+
+multisamp.o urand.o:	random.h
+
+cone.o face.o free_os.o image.o instance.o error.o objset.o \
+octree.o modobject.o readfargs.o otypes.o dircode.o mesh.o \
+readmesh.o readobj.o readoct.o sceneio.o xf.o:	standard.h mat4.h fvect.h
+
+image.o:	view.h
+
+calprnt.o:	calcomp.h
+
+process.o:	vfork.h
+
+clip.o plocate.o:	plocate.h
+
+font.o:	font.h
+
+fropen.o getpath.o image.o:	paths.h
+
+lookup.o:	lookup.h
+
+loadvars.o:	vars.h
+
+mesh.o readmesh.o:	mesh.h lookup.h
+
+tonemap.o tmapcolrs.o tmapluv.o:	tmprivat.h tonemap.h color.h
+
+tmapluv.o:	uvcode.h tiffio.h tmaptiff.h tiff.h
+
+tonemap.o:	tmerrmsg.h
+
+tmaptiff.o:	tmprivat.h tmaptiff.h color.h tonemap.h
+
+rglfile.o rglmat.o rgldomat.o rglsurf.o rglinst.o rglsrc.o:	radogl.h \
+standard.h mat4.h fvect.h color.h object.h otypes.h lookup.h
+
+free_os.o:	octree.h object.h otypes.h face.h cone.h instance.h
+
+tmesh.o:	tmesh.h fvect.h
