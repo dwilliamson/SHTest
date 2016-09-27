@@ -1,9 +1,13 @@
 
 # Spherical Harmonic Lighting
-### Don Williamson, June 2003
+#### Don Williamson, June 2003
 
 This is an implementation of Spherical Harmonic Lighting to partially simulate Global Illumination
-on a per-vertex level in real-time. The structure of the program follows directly from the material
+on a per-vertex level in real-time.
+
+![Screenshot](Reference/06-16-2003.jpg)
+
+The structure of the program follows directly from the material
 written in Robin Green's excellent GDC2003 presentation. It basically functions as an object
 viewer with many modes. You can rotate all objects you can see by clicking the left mouse button on
 the window and dragging in any direction. You can change modes by pressing the space bar. The modes
