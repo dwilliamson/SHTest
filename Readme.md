@@ -5,7 +5,9 @@
 This is an implementation of Spherical Harmonic Lighting to partially simulate Global Illumination
 on a per-vertex level in real-time.
 
-![Screenshot](Reference/06-16-2003.jpg)
+<p align="center">
+  <img src="Reference/06-16-2003.jpg?raw=true" alt="Screenshot"/>
+</p>
 
 The structure of the program follows directly from the material
 written in Robin Green's excellent GDC2003 presentation. It basically functions as an object
