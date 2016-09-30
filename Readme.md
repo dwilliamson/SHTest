@@ -24,7 +24,7 @@ are:
 7. Diffusely lit with self-shadowing.
 8. Diffusely lit with self-shadowing and inter-reflectance.
 
-This is a Win32 OpenGL program that any recent (last 3 years) video card should be able to run.
+This is a Win32 OpenGL program that any recent (last 13 years) video card should be able to run.
 
 The simulation starts by generating SH co-efficients for each vertex in 3 types of lighting model:
 diffuse unshadowed, diffuse shadowed, and diffuse inter-reflected. For each vertex, integration over
